@@ -8,10 +8,6 @@ A modern, beautiful, and intuitive web application to help you track your income
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 
-## 🌟 Live Demo
-
-[View Live Demo](https://aryankanchan018.github.io/new-demo-/)
-
 ## 📋 Table of Contents
 
 - [Features](#-features)
@@ -114,9 +110,6 @@ xdg-open index.html  # Linux
 2. Select "Download ZIP"
 3. Extract the ZIP file
 4. Open `index.html` in your web browser
-
-### Option 3: Use GitHub Pages
-Simply visit the live demo link (if GitHub Pages is enabled)
 
 ## 🚀 Usage
 
