@@ -103,6 +103,7 @@ function getCategoryIcon(category) {
         salary: '💼',
         freelance: '💻',
         investment: '📈',
+        lent: '🤝',
         food: '🍔',
         transport: '🚗',
         entertainment: '🎬',
@@ -114,7 +115,7 @@ function getCategoryIcon(category) {
 }
 
 function formatCurrency(amount) {
-    return '$' + Math.abs(amount).toFixed(2);
+    return '₹' + Math.abs(amount).toFixed(2);
 }
 
 function renderChart() {
