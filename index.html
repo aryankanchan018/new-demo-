@@ -1,26 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Finance Tracker</title>
+    <title>Finance Tracker</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
 </head>
 <body>
     <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
     <div class="container">
+        <!-- Header -->
         <header>
-            <h1>💰 Finance Tracker</h1>
-            <p class="subtitle">Take control of your money</p>
+            <div class="header-left">
+                <h1>💰 Finance Tracker</h1>
+                <p class="subtitle">Take control of your money</p>
+            </div>
+            <div class="header-actions">
+                <select id="currencySelect" class="currency-select" aria-label="Select currency">
+                    <option value="₹">₹ INR</option>
+                    <option value="$">$ USD</option>
+                    <option value="€">€ EUR</option>
+                    <option value="£">£ GBP</option>
+                    <option value="¥">¥ JPY</option>
+                </select>
+                <button id="darkModeToggle" class="btn-icon-round" aria-label="Toggle dark mode">🌙</button>
+                <button id="installBtn" class="btn-install" hidden>📲 Install App</button>
+            </div>
         </header>
 
+        <!-- Summary Cards -->
         <div class="dashboard">
             <div class="card balance-card">
                 <div class="card-icon">⚖️</div>
                 <div>
                     <p class="card-label">Total Balance</p>
-                    <p class="balance-amount" id="totalBalance">₹0.00</p>
+                    <p class="balance-amount zero" id="totalBalance">₹0.00</p>
                 </div>
             </div>
             <div class="card income-card">
@@ -37,10 +54,28 @@
                     <p class="expense-amount" id="totalExpense">₹0.00</p>
                 </div>
             </div>
+            <div class="card savings-card">
+                <div class="card-icon">🎯</div>
+                <div>
+                    <p class="card-label">Savings Rate</p>
+                    <p class="savings-amount" id="savingsRate">0%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Filter Bar -->
+        <div class="month-bar card">
+            <label for="monthFilter">📅 View Month:</label>
+            <input type="month" id="monthFilter">
+            <button id="clearMonthFilter" class="btn-text">Show All</button>
+            <span id="monthSummary" class="month-summary"></span>
         </div>
 
         <div class="main-content">
+            <!-- LEFT -->
             <div class="left-section">
+
+                <!-- Add Transaction Form -->
                 <div class="card form-card">
                     <h2>Add Transaction</h2>
                     <form id="transactionForm" novalidate>
@@ -51,7 +86,7 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="amount">Amount (₹)</label>
+                                <label for="amount">Amount</label>
                                 <input type="number" id="amount" placeholder="0.00" step="0.01" min="0.01" required>
                                 <span class="field-error" id="amtError"></span>
                             </div>
@@ -80,41 +115,88 @@
                                 </optgroup>
                             </select>
                         </div>
-                        <div class="form-group radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="type" value="income" checked>
-                                <span class="radio-label income-label">📥 Income</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="type" value="expense">
-                                <span class="radio-label expense-label">📤 Expense</span>
-                            </label>
+                        <div class="form-group">
+                            <label for="notes">Notes (optional)</label>
+                            <input type="text" id="notes" placeholder="Add a note..." maxlength="100">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="recurring">Recurring</label>
+                                <select id="recurring">
+                                    <option value="none">None</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="form-group radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="type" value="income" checked>
+                                    <span class="radio-label income-label">📥 Income</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="type" value="expense">
+                                    <span class="radio-label expense-label">📤 Expense</span>
+                                </label>
+                            </div>
                         </div>
                         <button type="submit" class="btn-primary">
-                            <span class="btn-icon">+</span> Add Transaction
+                            <span>+</span> Add Transaction
                         </button>
                     </form>
                 </div>
 
+                <!-- Budget Goals -->
+                <div class="card budget-card">
+                    <div class="budget-header">
+                        <h2>📊 Budget Goals</h2>
+                        <button id="addBudgetBtn" class="btn-text">+ Add Budget</button>
+                    </div>
+                    <div id="budgetList" class="budget-list">
+                        <p class="empty-hint">No budgets set. Click "+ Add Budget" to start.</p>
+                    </div>
+                </div>
+
+                <!-- Expense Pie Chart -->
                 <div class="card chart-card">
-                    <h2>Expense Breakdown</h2>
+                    <h2>🥧 Expense Breakdown</h2>
                     <canvas id="expenseChart"></canvas>
                     <div id="noDataMessage" class="no-data">
-                        <span class="no-data-icon">📊</span>
+                        <span>📊</span>
                         <p>No expenses to display yet</p>
                     </div>
                 </div>
             </div>
 
+            <!-- RIGHT -->
             <div class="right-section">
+
+                <!-- Monthly Bar Chart -->
+                <div class="card chart-card">
+                    <h2>📈 Monthly Overview</h2>
+                    <canvas id="barChart"></canvas>
+                    <div id="noBarData" class="no-data">
+                        <span>📉</span>
+                        <p>Add transactions to see monthly trends</p>
+                    </div>
+                </div>
+
+                <!-- Transactions -->
                 <div class="card transactions-card">
                     <div class="transactions-header">
                         <h2>Transactions</h2>
-                        <button id="clearAll" class="btn-clear" aria-label="Clear all transactions">🗑 Clear All</button>
+                        <div class="txn-actions">
+                            <button id="exportBtn" class="btn-action" title="Export CSV">⬇ Export</button>
+                            <label class="btn-action" title="Import CSV">
+                                ⬆ Import
+                                <input type="file" id="importFile" accept=".csv" hidden>
+                            </label>
+                            <button id="clearAll" class="btn-clear" aria-label="Clear all">🗑 Clear</button>
+                        </div>
                     </div>
                     <div class="search-filter-bar">
-                        <input type="search" id="searchInput" placeholder="🔍 Search transactions..." aria-label="Search transactions">
-                        <div class="filter-chips" role="group" aria-label="Filter by type">
+                        <input type="search" id="searchInput" placeholder="🔍 Search transactions..." aria-label="Search">
+                        <div class="filter-chips" role="group">
                             <button class="chip active" data-filter="all">All</button>
                             <button class="chip income-chip" data-filter="income">Income</button>
                             <button class="chip expense-chip" data-filter="expense">Expense</button>
@@ -131,14 +213,97 @@
         </div>
     </div>
 
-    <!-- Confirm Modal -->
-    <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <!-- Clear All Modal -->
+    <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" hidden>
         <div class="modal">
-            <p id="modalTitle">Clear all transactions?</p>
+            <p>Clear all transactions?</p>
             <p class="modal-sub">This action cannot be undone.</p>
             <div class="modal-actions">
                 <button id="modalCancel" class="btn-modal-cancel">Cancel</button>
                 <button id="modalConfirm" class="btn-modal-confirm">Yes, Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div id="editModal" class="modal-overlay" role="dialog" aria-modal="true" hidden>
+        <div class="modal modal-lg">
+            <h3 class="modal-title">✏️ Edit Transaction</h3>
+            <form id="editForm" novalidate>
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editDescription">Description</label>
+                    <input type="text" id="editDescription" required maxlength="60">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editAmount">Amount</label>
+                        <input type="number" id="editAmount" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDate">Date</label>
+                        <input type="date" id="editDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editCategory">Category</label>
+                    <select id="editCategory" required>
+                        <option value="salary">💼 Salary</option>
+                        <option value="freelance">💻 Freelance</option>
+                        <option value="investment">📈 Investment</option>
+                        <option value="lent">🤝 Money Lent</option>
+                        <option value="food">🍔 Food</option>
+                        <option value="transport">🚗 Transport</option>
+                        <option value="entertainment">🎬 Entertainment</option>
+                        <option value="shopping">🛍️ Shopping</option>
+                        <option value="bills">📄 Bills</option>
+                        <option value="other">📦 Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">Notes</label>
+                    <input type="text" id="editNotes" maxlength="100">
+                </div>
+                <div class="form-group radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="editType" value="income">
+                        <span class="radio-label income-label">📥 Income</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="editType" value="expense">
+                        <span class="radio-label expense-label">📤 Expense</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="editCancel" class="btn-modal-cancel">Cancel</button>
+                    <button type="submit" class="btn-modal-confirm">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Budget Modal -->
+    <div id="budgetModal" class="modal-overlay" role="dialog" aria-modal="true" hidden>
+        <div class="modal">
+            <h3 class="modal-title">🎯 Set Budget Goal</h3>
+            <div class="form-group">
+                <label for="budgetCategory">Category</label>
+                <select id="budgetCategory">
+                    <option value="food">🍔 Food</option>
+                    <option value="transport">🚗 Transport</option>
+                    <option value="entertainment">🎬 Entertainment</option>
+                    <option value="shopping">🛍️ Shopping</option>
+                    <option value="bills">📄 Bills</option>
+                    <option value="other">📦 Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="budgetAmount">Monthly Budget Amount</label>
+                <input type="number" id="budgetAmount" placeholder="0.00" min="1" step="0.01">
+            </div>
+            <div class="modal-actions">
+                <button id="budgetCancel" class="btn-modal-cancel">Cancel</button>
+                <button id="budgetSave" class="btn-modal-confirm">Save Budget</button>
             </div>
         </div>
     </div>
